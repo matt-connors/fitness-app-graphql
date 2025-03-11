@@ -1,0 +1,26 @@
+generator kysely {
+    provider = "prisma-kysely"
+    output   = "../src"
+    fileName = "types.ts"
+}
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("WRANGLER_HYPERDRIVE_LOCAL_CONNECTION_STRING_fitness-app-db-prod")
+    directUrl = env("DIRECT_DB_URL")
+}
+
+/**
+ * Enums
+ */
+
+
+
+/**
+ * Tables
+ */
