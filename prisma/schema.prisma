@@ -15,12 +15,26 @@ datasource db {
     directUrl = env("DIRECT_DB_URL")
 }
 
-/**
- * Enums
- */
+//
+// Enums
+//
 
+enum PermissionAction {
+    VIEW
+    EDIT
+    CREATE
+    DELETE
+    MANAGE
+}
 
+enum PermissionResource {
+    DEFAULT
+}
 
-/**
- * Tables
- */
+//
+// Tables
+//
+
+model User {
+    id  Int @id @default(autoincrement())
+}
