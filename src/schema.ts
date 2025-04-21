@@ -1,6 +1,9 @@
 import { builder } from '@/src/builder';
 
-export * from '@/models/.'
-export * from '@/resolvers/.'
+// Import all model types
+import '@/src/models';
+
+// Import all resolvers
+import '@/src/resolvers';
 
 export const schema = builder.toSchema()

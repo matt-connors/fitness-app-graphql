@@ -91,3 +91,11 @@ builder.scalarType('DateTime', {
         return new Date(value);
     }
 })
+
+// Explicitly define Query and Mutation types
+builder.queryType({
+    name: 'Query'
+});
+builder.mutationType({
+    name: 'Mutation'
+});
