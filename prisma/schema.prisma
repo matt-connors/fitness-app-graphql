@@ -31,10 +31,127 @@ enum PermissionResource {
     DEFAULT
 }
 
+enum AuthProvider {
+    Email
+    Google
+    Apple
+}
+
+enum UnitPreference {
+    Metric
+    Imperial
+}
+
+enum Gender {
+    Male
+    Female
+}
+
+enum UserRoutineRole {
+    Creator
+    Participant
+}
+
+enum SkillLevel {
+    Beginner
+    Intermediate
+    Advanced
+    AllLevels
+}
+
+enum TargetMuscle {
+    Chest
+    Back
+    Legs
+    Shoulders
+    Arms
+    Core
+}
+
+enum RoutineType {
+    Strength
+    Endurance
+    Flexibility
+    Balance
+    Mobility
+}
+
 //
 // Tables
 //
 
 model User {
-    id  Int @id @default(autoincrement())
+    id                  Int             @id @default(autoincrement())
+    username            String          @unique
+    email               String          @unique
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
+    profilePictureUrl   String?
+    authProvider        AuthProvider
+    authProviderId      String?
+    preferredUnits      UnitPreference
+    notificationsEnabled Boolean        @default(true)
+    gender              Gender?
+    age                 Int?
+    height              Float?
+    weight              Float?
+    
+    // Relations
+    userRoutines        UserRoutine[]
+}
+
+model UserRoutine {
+    userId              Int
+    routineId           Int
+    role                UserRoutineRole
+    joinedAt            DateTime        @default(now())
+    
+    // Relations
+    user                User            @relation(fields: [userId], references: [id])
+    routine             Routine         @relation(fields: [routineId], references: [id])
+    
+    @@id([userId, routineId])
+}
+
+model Routine {
+    id                  Int             @id @default(autoincrement())
+    name                String
+    type                RoutineType
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
+    skillLevel          SkillLevel?
+    
+    // Relations
+    userRoutines        UserRoutine[]
+    routineExercises    RoutineExercise[]
+}
+
+model RoutineExercise {
+    routineId           Int
+    exerciseId          Int
+    notes               String?
+    sets                Json            @db.JsonB // Array of set objects with reps, rpe/weight
+    restTime            Int?
+    order               Int
+    rir                 Int?    
+    
+    // Relations
+    routine             Routine         @relation(fields: [routineId], references: [id])
+    exercise            Exercise        @relation(fields: [exerciseId], references: [id])
+    
+    @@id([routineId, exerciseId])
+}
+
+model Exercise {
+    id                  Int             @id @default(autoincrement())
+    name                String
+    targetMuscle        TargetMuscle
+    iconUrl             String
+    posterUrl           String
+    instructions        Json?           @db.JsonB // Array of step objects with text and images
+    cues                Json?           @db.JsonB // Array of strings
+    overview            String?
+    
+    // Relations
+    routineExercises    RoutineExercise[]
 }

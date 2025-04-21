@@ -73,6 +73,7 @@ const yoga = createYoga<Env>({
     schema,
     context: async (context: YogaRequestContext) => ({
         ...context,
+        // User ID passed from the auth gateway
         userId: '08ca68d1-6f1b-4ea6-9ffb-bb2de276b6cc'
     })
 })
