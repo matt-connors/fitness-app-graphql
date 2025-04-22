@@ -10,11 +10,23 @@ builder.queryField('routine', (t) =>
       id: t.arg.int({ required: true }),
     },
     resolve: async (_, { id }, { db }) => {
-      // Cast the result to help with TypeScript compatibility
-      return db.selectFrom('Routine')
+      const routine = await db.selectFrom('Routine')
         .where('id', '=', id)
         .selectAll()
-        .executeTakeFirst() as any;
+        .executeTakeFirst();
+      
+      if (!routine) return null;
+      
+      // Get exercise count
+      const exerciseCountResult = await db.selectFrom('RoutineExercise')
+        .where('routineId', '=', id)
+        .select(db.fn.count('exerciseId').as('count'))
+        .executeTakeFirst();
+      
+      return {
+        ...routine,
+        exerciseCount: Number(exerciseCountResult?.count || 0)
+      } as any;
     },
   })
 );
@@ -47,13 +59,39 @@ builder.queryField('routines', (t) =>
         query = query.where('skillLevel', '=', skillLevel as any);
       }
       
-      // Cast the result to help with TypeScript compatibility
-      return query
+      const routines = await query
         .offset(skip || 0)
         .limit(take || 10)
         .orderBy('createdAt', 'desc')
         .selectAll()
-        .execute() as any;
+        .execute();
+      
+      // Get exercise counts for each routine
+      const routineIds = routines.map(r => r.id);
+      
+      if (routineIds.length === 0) {
+        return [];
+      }
+      
+      const exerciseCounts = await db.selectFrom('RoutineExercise')
+        .where('routineId', 'in', routineIds)
+        .select('routineId')
+        .select(db.fn.count('exerciseId').as('count'))
+        .groupBy('routineId')
+        .execute();
+      
+      const exerciseCountMap = new Map();
+      exerciseCounts.forEach(ec => {
+        exerciseCountMap.set(ec.routineId, Number(ec.count));
+      });
+      
+      // Add exercise count to each routine
+      const enrichedRoutines = routines.map(routine => ({
+        ...routine,
+        exerciseCount: exerciseCountMap.get(routine.id) || 0
+      }));
+      
+      return enrichedRoutines as any;
     },
   })
 ); 
