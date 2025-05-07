@@ -19,7 +19,7 @@ const CreateRoutineInputType = builder.inputType('CreateRoutineInput', {
     name: t.field({ type: 'String', required: true }),
     type: t.field({ type: 'String', required: true }),
     skillLevel: t.field({ type: 'String' }),
-    exercises: t.field({ type: [RoutineExerciseInputType], required: true }),
+    routineExercises: t.field({ type: [RoutineExerciseInputType], required: true }),
   }),
 });
 
@@ -28,7 +28,7 @@ const UpdateRoutineInputType = builder.inputType('UpdateRoutineInput', {
     name: t.field({ type: 'String' }),
     type: t.field({ type: 'String' }),
     skillLevel: t.field({ type: 'String' }),
-    exercises: t.field({ type: [RoutineExerciseInputType] }),
+    routineExercises: t.field({ type: [RoutineExerciseInputType] }),
   }),
 });
 
@@ -64,10 +64,10 @@ builder.mutationField('createRoutine', (t) =>
           .executeTakeFirstOrThrow();
         
         // Then create all of the routine exercises
-        if (input.exercises && input.exercises.length > 0) {
+        if (input.routineExercises && input.routineExercises.length > 0) {
           await trx.insertInto('RoutineExercise')
             .values(
-              input.exercises.map(ex => ({
+              input.routineExercises.map(ex => ({
                 routineId: routine.id,
                 exerciseId: ex.exerciseId,
                 sets: JSON.stringify(ex.sets),
@@ -122,17 +122,17 @@ builder.mutationField('updateRoutine', (t) =>
         }
         
         // Update exercises if provided
-        if (input.exercises !== undefined) {
+        if (input.routineExercises !== undefined) {
           // Delete all existing routine exercises
           await trx.deleteFrom('RoutineExercise')
             .where('routineId', '=', id)
             .execute();
           
           // Insert new routine exercises
-          if (input.exercises && input.exercises.length > 0) {
+          if (input.routineExercises && input.routineExercises.length > 0) {
             await trx.insertInto('RoutineExercise')
               .values(
-                input.exercises.map(ex => ({
+                input.routineExercises.map(ex => ({
                   routineId: id,
                   exerciseId: ex.exerciseId,
                   sets: JSON.stringify(ex.sets),
