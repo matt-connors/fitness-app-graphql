@@ -9,7 +9,18 @@ builder.mutationField('createSessionExercise', (t) =>
       sessionId: t.arg.int({ required: true }),
       exerciseId: t.arg.int({ required: true }),
     },
-    resolve: async (_, args, { db }) => {
+    resolve: async (_, args, { db, userId }) => {
+      // Verify the session belongs to the current user
+      const session = await db.selectFrom('Session')
+        .where('id', '=', args.sessionId)
+        .where('userId', '=', userId)
+        .selectAll()
+        .executeTakeFirst();
+        
+      if (!session) {
+        throw new Error('Session not found or you do not have permission to add exercises to it');
+      }
+      
       return db.insertInto('SessionExercise')
         .values({
           sessionId: args.sessionId,
@@ -28,7 +39,28 @@ builder.mutationField('deleteSessionExercise', (t) =>
     args: {
       id: t.arg.int({ required: true }),
     },
-    resolve: async (_, { id }, { db }) => {
+    resolve: async (_, { id }, { db, userId }) => {
+      // Check if the session exercise belongs to the user's session
+      const sessionExercise = await db.selectFrom('SessionExercise')
+        .where('id', '=', id)
+        .selectAll()
+        .executeTakeFirst();
+        
+      if (!sessionExercise) {
+        return false;
+      }
+      
+      // Verify session ownership
+      const session = await db.selectFrom('Session')
+        .where('id', '=', sessionExercise.sessionId)
+        .where('userId', '=', userId)
+        .selectAll()
+        .executeTakeFirst();
+        
+      if (!session) {
+        return false; // Not the user's session
+      }
+      
       // First delete all associated sets
       await db.deleteFrom('SessionSet')
         .where('sessionExerciseId', '=', id)

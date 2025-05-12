@@ -71,11 +71,15 @@ const yoga = createYoga<Env>({
     // },
     logging: logger,
     schema,
-    context: async (context: YogaRequestContext) => ({
-        ...context,
-        // User ID passed from the auth gateway
-        userId: 1
-    })
+    context: async (initialContext: YogaRequestContext) => {
+        const dbContext = createContext(initialContext.DIRECT_DB_URL);
+        return {
+            ...initialContext,
+            ...dbContext,
+            // User ID passed from the auth gateway
+            userId: 1
+        };
+    }
 })
 
 /**

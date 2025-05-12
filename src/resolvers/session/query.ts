@@ -9,9 +9,10 @@ builder.queryField('session', (t) =>
     args: {
       id: t.arg.int({ required: true }),
     },
-    resolve: async (_, { id }, { db }) => {
+    resolve: async (_, { id }, { db, userId }) => {
       return db.selectFrom('Session')
         .where('id', '=', id)
+        .where('userId', '=', userId) // Only allow access to user's own sessions
         .selectAll()
         .executeTakeFirst() as any;
     },
@@ -24,21 +25,17 @@ builder.queryField('sessions', (t) =>
     type: [SessionType],
     nullable: false,
     args: {
-      userId: t.arg.int({ required: false }),
       routineId: t.arg.int({ required: false }),
       skip: t.arg.int({ defaultValue: 0 }),
       take: t.arg.int({ defaultValue: 10 }),
       fromDate: t.arg.string({ required: false }),
       toDate: t.arg.string({ required: false }),
     },
-    resolve: async (_, { userId, routineId, skip, take, fromDate, toDate }, { db }) => {
-      let query = db.selectFrom('Session');
+    resolve: async (_, { routineId, skip, take, fromDate, toDate }, { db, userId }) => {
+      let query = db.selectFrom('Session')
+        .where('userId', '=', userId); // Always filter by the authenticated user
 
-      // Apply filters if provided
-      if (userId) {
-        query = query.where('userId', '=', userId);
-      }
-      
+      // Apply additional filters if provided
       if (routineId) {
         query = query.where('routineId', '=', routineId);
       }

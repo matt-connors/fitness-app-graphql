@@ -18,10 +18,11 @@ const connection = (connectionString: string) => new Kysely<DB>({
 })
 
 export type Context = {
-    db: Kysely<DB>
+    db: Kysely<DB>,
+    userId: number
 }
 
-export const createContext = (connectionString: string): Context => {
+export const createContext = (connectionString: string): Omit<Context, 'userId'> => {
     return {
         db: connection(connectionString)
     }
