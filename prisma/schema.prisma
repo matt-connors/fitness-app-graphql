@@ -98,6 +98,7 @@ model User {
     
     // Relations
     userRoutines        UserRoutine[]
+    sessions            Session[]
 }
 
 model UserRoutine {
@@ -124,6 +125,7 @@ model Routine {
     // Relations
     userRoutines        UserRoutine[]
     routineExercises    RoutineExercise[]
+    sessions            Session[]
 }
 
 model RoutineExercise {
@@ -154,4 +156,42 @@ model Exercise {
     
     // Relations
     routineExercises    RoutineExercise[]
+    sessionExercises    SessionExercise[]
+}
+
+model Session {
+    id                  Int                 @id @default(autoincrement())
+    userId              Int
+    routineId           Int?
+    name                String?
+    date                DateTime            @default(now())
+    duration            Int?                // Duration in seconds
+    notes               String?
+    
+    // Relations
+    user                User                @relation(fields: [userId], references: [id])
+    routine             Routine?            @relation(fields: [routineId], references: [id])
+    sessionExercises    SessionExercise[]
+}
+
+model SessionExercise {
+    id                  Int                 @id @default(autoincrement())
+    sessionId           Int
+    exerciseId          Int
+    
+    // Relations
+    session             Session             @relation(fields: [sessionId], references: [id])
+    exercise            Exercise            @relation(fields: [exerciseId], references: [id])
+    sets                SessionSet[]
+}
+
+model SessionSet {
+    id                  Int                 @id @default(autoincrement())
+    sessionExerciseId   Int
+    setNumber           Int
+    reps                Int?
+    weight              Float?
+    
+    // Relations
+    sessionExercise     SessionExercise     @relation(fields: [sessionExerciseId], references: [id])
 }

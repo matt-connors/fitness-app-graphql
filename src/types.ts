@@ -88,6 +88,27 @@ export type RoutineExercise = {
     order: number;
     rir: number | null;
 };
+export type Session = {
+    id: Generated<number>;
+    userId: number;
+    routineId: number | null;
+    name: string | null;
+    date: Generated<Timestamp>;
+    duration: number | null;
+    notes: string | null;
+};
+export type SessionExercise = {
+    id: Generated<number>;
+    sessionId: number;
+    exerciseId: number;
+};
+export type SessionSet = {
+    id: Generated<number>;
+    sessionExerciseId: number;
+    setNumber: number;
+    reps: number | null;
+    weight: number | null;
+};
 export type User = {
     id: Generated<number>;
     username: string;
@@ -114,6 +135,9 @@ export type DB = {
     Exercise: Exercise;
     Routine: Routine;
     RoutineExercise: RoutineExercise;
+    Session: Session;
+    SessionExercise: SessionExercise;
+    SessionSet: SessionSet;
     User: User;
     UserRoutine: UserRoutine;
 };
